@@ -6,6 +6,17 @@ Este script implementa la base del sistema:
 - Crea su probabilidad inicial en `1%`.
 - Deja lista la estructura para aumentar esa probabilidad con el tiempo en el siguiente paso.
 
+## Dónde va cada archivo (Roblox Studio)
+
+Si lo vas a copiar y pegar manualmente, hazlo así:
+
+1. Ve a **ServerScriptService**.
+2. Crea un **Script** nuevo.
+3. Ponle este nombre: **`PlayerChanceSystem`**.
+4. Copia el contenido de `PlayerChanceSystem.server.lua` dentro de ese Script.
+
+> Resumen rápido: `PlayerChanceSystem.server.lua` va dentro de **ServerScriptService** como un **Script** llamado **PlayerChanceSystem**.
+
 ## Script base
 
 Usa `PlayerChanceSystem.server.lua`:
