@@ -1,10 +1,11 @@
 # Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-Ahora tienes 3 scripts conectados:
+Ahora tienes 4 scripts conectados:
 
 1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
 2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
 3. `RiskBillboardManager.client.lua` (UI sobre la cabeza con el `%` de riesgo).
+4. `FirstPersonEnforcer.client.lua` (fuerza cámara en primera persona).
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -25,6 +26,12 @@ Ahora tienes 3 scripts conectados:
 - **Ubicación:** `StarterPlayer > StarterPlayerScripts`
 - **Tipo:** `LocalScript`
 - **Nombre sugerido:** `RiskBillboardManager`
+
+### 4) Primera persona forzada
+- **Archivo:** `FirstPersonEnforcer.client.lua`
+- **Ubicación:** `StarterPlayer > StarterPlayerScripts`
+- **Tipo:** `LocalScript`
+- **Nombre sugerido:** `FirstPersonEnforcer`
 
 ## Estructura del modelo de puerta
 
@@ -97,3 +104,8 @@ Este LocalScript crea un `BillboardGui` llamado `RiskBillboard` sobre cada jugad
 - 81-100: rojo oscuro
 
 Se actualiza automáticamente cuando cambia el atributo `ChancePercent` y se recrea en respawn (`CharacterAdded`).
+
+
+## FirstPersonEnforcer
+
+Este LocalScript fuerza cámara en primera persona (`LockFirstPerson`) al cargar, al respawn y con verificación periódica cada 3 segundos.
