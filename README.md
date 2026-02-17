@@ -1,9 +1,10 @@
 # Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-Ahora tienes 2 scripts conectados:
+Ahora tienes 3 scripts conectados:
 
 1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
 2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
+3. `RiskBillboardManager.client.lua` (UI sobre la cabeza con el `%` de riesgo).
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -18,6 +19,12 @@ Ahora tienes 2 scripts conectados:
 - **Ubicación:** dentro del **Model de la puerta**
 - **Tipo:** `Script`
 - **Nombre sugerido:** `DoorTrap`
+
+### 3) Billboard de riesgo (UI)
+- **Archivo:** `RiskBillboardManager.client.lua`
+- **Ubicación:** `StarterPlayer > StarterPlayerScripts`
+- **Tipo:** `LocalScript`
+- **Nombre sugerido:** `RiskBillboardManager`
 
 ## Estructura del modelo de puerta
 
@@ -77,3 +84,16 @@ Con esto:
 - En modo normal no hay muerte por tocar puerta.
 - En modo trampa solo muere si hay contacto real durante el cierre.
 - Si el jugador corre y evita la puerta cerrándose, sobrevive.
+
+
+## Billboard de riesgo (RiskBillboardManager)
+
+Este LocalScript crea un `BillboardGui` llamado `RiskBillboard` sobre cada jugador y muestra su `ChancePercent` con color dinámico:
+
+- 0-20: verde
+- 21-40: amarillo
+- 41-60: naranja
+- 61-80: rojo
+- 81-100: rojo oscuro
+
+Se actualiza automáticamente cuando cambia el atributo `ChancePercent` y se recrea en respawn (`CharacterAdded`).
