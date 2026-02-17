@@ -1,0 +1,111 @@
+# Sistema de probabilidad + trampas + puerta con umbral (15%)
+
+Ahora tienes 4 scripts conectados:
+
+1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
+2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
+3. `RiskBillboardManager.client.lua` (UI sobre la cabeza con el `%` de riesgo).
+4. `FirstPersonEnforcer.client.lua` (fuerza cámara en primera persona).
+
+## Dónde va cada archivo (Roblox Studio)
+
+### 1) Sistema central
+- **Archivo:** `PlayerChanceSystem.server.lua`
+- **Ubicación:** `ServerScriptService`
+- **Tipo:** `Script`
+- **Nombre sugerido:** `PlayerChanceSystem`
+
+### 2) Script de la puerta
+- **Archivo:** `DoorTrap.server.lua`
+- **Ubicación:** dentro del **Model de la puerta**
+- **Tipo:** `Script`
+- **Nombre sugerido:** `DoorTrap`
+
+### 3) Billboard de riesgo (UI)
+- **Archivo:** `RiskBillboardManager.client.lua`
+- **Ubicación:** `StarterPlayer > StarterPlayerScripts`
+- **Tipo:** `LocalScript`
+- **Nombre sugerido:** `RiskBillboardManager`
+
+### 4) Primera persona forzada
+- **Archivo:** `FirstPersonEnforcer.client.lua`
+- **Ubicación:** `StarterPlayer > StarterPlayerScripts`
+- **Tipo:** `LocalScript`
+- **Nombre sugerido:** `FirstPersonEnforcer`
+
+## Estructura del modelo de puerta
+
+Dentro del modelo (padre del script `DoorTrap`) debes tener:
+
+- `Puerta1` (Part)
+- `Puerta2` (Part)
+- `PosicionPuerta1` (Part de destino de apertura)
+- `PosicionPuerta2` (Part de destino de apertura)
+- `Detector1` (Part)
+- `Detector2` (Part)
+
+## Lógica solicitada
+
+- Si el jugador tiene **menos de 15%** (`ChancePercent < 15`):
+  - la puerta abre normal,
+  - y cierra con velocidad estándar.
+
+- Si el jugador tiene **15% o más** (`ChancePercent >= 15`):
+  - la puerta abre normal,
+  - y cierra más rápido (modo trampa).
+
+La muerte **no es instantánea** al activar trampa: solo ocurre si el jugador toca `Puerta1` o `Puerta2` mientras la puerta se está cerrando en modo trampa (aplastamiento real).
+
+## Configuración de velocidades (DoorTrap)
+
+En `DoorTrap.server.lua` puedes ajustar:
+
+- `OPEN_TIME = 1`
+- `NORMAL_CLOSE_TIME = 1`
+- `TRAP_CLOSE_TIME = 0.25`
+- `HOLD_OPEN_TIME = 0.2`
+
+## Nota técnica importante
+
+`PlayerChanceSystem` guarda la probabilidad en atributo del jugador:
+
+- `player:SetAttribute("ChancePercent", valor)`
+
+Eso permite que `DoorTrap` lea el porcentaje sin depender de variables locales.
+
+## Anti-spam
+
+- En `PlayerChanceSystem` existe anti-spam por jugador para trampas de `Touched`.
+- En `DoorTrap` existe cooldown por detector para evitar múltiples activaciones instantáneas.
+
+
+## Daño por aplastamiento (justo)
+
+`DoorTrap` usa dos estados internos:
+
+- `puertaCerrando`: `true` solo durante el tween de cierre.
+- `trapDamageEnabled`: `true` solo en cierre de modo trampa.
+
+Con esto:
+
+- En modo normal no hay muerte por tocar puerta.
+- En modo trampa solo muere si hay contacto real durante el cierre.
+- Si el jugador corre y evita la puerta cerrándose, sobrevive.
+
+
+## Billboard de riesgo (RiskBillboardManager)
+
+Este LocalScript crea un `BillboardGui` llamado `RiskBillboard` sobre cada jugador y muestra su `ChancePercent` con color dinámico:
+
+- 0-20: verde
+- 21-40: amarillo
+- 41-60: naranja
+- 61-80: rojo
+- 81-100: rojo oscuro
+
+Se actualiza automáticamente cuando cambia el atributo `ChancePercent` y se recrea en respawn (`CharacterAdded`).
+
+
+## FirstPersonEnforcer
+
+Este LocalScript fuerza cámara en primera persona (`LockFirstPerson`) al cargar, al respawn y con verificación periódica cada 3 segundos.
