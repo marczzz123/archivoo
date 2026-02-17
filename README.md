@@ -38,8 +38,9 @@ Dentro del modelo (padre del script `DoorTrap`) debes tener:
 
 - Si el jugador tiene **15% o más** (`ChancePercent >= 15`):
   - la puerta abre normal,
-  - y cierra más rápido (modo trampa),
-  - provocando muerte del jugador.
+  - y cierra más rápido (modo trampa).
+
+La muerte **no es instantánea** al activar trampa: solo ocurre si el jugador toca `Puerta1` o `Puerta2` mientras la puerta se está cerrando en modo trampa (aplastamiento real).
 
 ## Configuración de velocidades (DoorTrap)
 
@@ -62,3 +63,17 @@ Eso permite que `DoorTrap` lea el porcentaje sin depender de variables locales.
 
 - En `PlayerChanceSystem` existe anti-spam por jugador para trampas de `Touched`.
 - En `DoorTrap` existe cooldown por detector para evitar múltiples activaciones instantáneas.
+
+
+## Daño por aplastamiento (justo)
+
+`DoorTrap` usa dos estados internos:
+
+- `puertaCerrando`: `true` solo durante el tween de cierre.
+- `trapDamageEnabled`: `true` solo en cierre de modo trampa.
+
+Con esto:
+
+- En modo normal no hay muerte por tocar puerta.
+- En modo trampa solo muere si hay contacto real durante el cierre.
+- Si el jugador corre y evita la puerta cerrándose, sobrevive.
