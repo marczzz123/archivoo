@@ -1,10 +1,10 @@
-# Primer paso del proyecto
+# Sistema de probabilidad por jugador (Paso 2)
 
-Este script implementa la base del sistema:
+Ahora el sistema ya hace 3 cosas:
 
 - Detecta cuando un jugador entra al juego.
-- Crea su probabilidad inicial en `1%`.
-- Deja lista la estructura para aumentar esa probabilidad con el tiempo en el siguiente paso.
+- Le asigna una probabilidad inicial de `1%`.
+- Aumenta su probabilidad automáticamente cada cierto tiempo.
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -17,15 +17,16 @@ Si lo vas a copiar y pegar manualmente, hazlo así:
 
 > Resumen rápido: `PlayerChanceSystem.server.lua` va dentro de **ServerScriptService** como un **Script** llamado **PlayerChanceSystem**.
 
-## Script base
-
-Usa `PlayerChanceSystem.server.lua`:
+## Script completo (Paso 2)
 
 ```lua
 local Players = game:GetService("Players")
 
 -- Configuración inicial
 local START_CHANCE = 1
+local INCREASE_AMOUNT = 1
+local INCREASE_EVERY_SECONDS = 10
+local MAX_CHANCE = 100
 
 Players.PlayerAdded:Connect(function(player)
     print(player.Name .. " se unió al juego")
@@ -34,15 +35,25 @@ Players.PlayerAdded:Connect(function(player)
     local chance = START_CHANCE
 
     print("Probabilidad inicial: " .. chance .. "%")
+
+    -- Loop que aumenta la probabilidad con el tiempo
+    while player.Parent do
+        task.wait(INCREASE_EVERY_SECONDS)
+
+        chance = math.min(chance + INCREASE_AMOUNT, MAX_CHANCE)
+
+        print(player.Name .. " ahora tiene " .. chance .. "% de probabilidad")
+    end
 end)
 ```
 
-## Qué hace
+## Qué hace cada configuración
 
-- `game:GetService("Players")`: obtiene el sistema que controla a los jugadores.
-- `Players.PlayerAdded`: se activa cuando alguien entra al juego.
-- `local chance = START_CHANCE`: asigna la probabilidad inicial al jugador.
+- `START_CHANCE`: probabilidad inicial al entrar.
+- `INCREASE_AMOUNT`: cuánto sube cada vez.
+- `INCREASE_EVERY_SECONDS`: cada cuántos segundos sube.
+- `MAX_CHANCE`: límite máximo para no pasar de `100%`.
 
-## Siguiente paso
+## Siguiente paso sugerido
 
-Crear un loop para aumentar `chance` cada cierto tiempo.
+Guardar la probabilidad por jugador en una tabla para usarla después en eventos, muertes o mecánicas de juego.
