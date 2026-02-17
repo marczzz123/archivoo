@@ -11,6 +11,8 @@ En este paso ya quedó implementado lo que faltaba:
 
 Si coincide, se activa el evento (por ahora: muerte).
 
+Además se agregó anti-spam: cada jugador tiene un cooldown de 3 segundos por trampa para evitar múltiples activaciones por `Touched`.
+
 ---
 
 ## Dónde va cada archivo (Roblox Studio)
@@ -53,6 +55,10 @@ local DEFAULT_TRAP_MAX_CHANCE = 100
 
 -- Tabla global para guardar la probabilidad de cada jugador
 local playerChances = {}
+
+-- Anti-spam de trampas por jugador
+local trapCooldowns = {}
+local TRAP_COOLDOWN_TIME = 3
 
 local function getCharacterPlayer(otherPart)
     if not otherPart then
@@ -98,6 +104,15 @@ local function onTrapTouched(trapPart, otherPart)
     if not player then
         return
     end
+
+    if trapCooldowns[player] then
+        return
+    end
+
+    trapCooldowns[player] = true
+    task.delay(TRAP_COOLDOWN_TIME, function()
+        trapCooldowns[player] = nil
+    end)
 
     local chance = playerChances[player]
     if not chance then
@@ -178,6 +193,7 @@ end)
 
 Players.PlayerRemoving:Connect(function(player)
     playerChances[player] = nil
+    trapCooldowns[player] = nil
 end)
 ```
 
@@ -198,3 +214,10 @@ end)
   - `MaxChance = 100`
 
 Así cada zona responde a distintos niveles de probabilidad del jugador.
+
+
+## Anti-spam (importante)
+
+- `Touched` puede dispararse muchas veces seguidas mientras el jugador sigue dentro de la trampa.
+- Por eso ahora existe `trapCooldowns[player]` con `TRAP_COOLDOWN_TIME = 3`.
+- Resultado: cada jugador solo puede procesar una activación de trampa cada 3 segundos.

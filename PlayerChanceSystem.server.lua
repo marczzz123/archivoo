@@ -15,6 +15,10 @@ local DEFAULT_TRAP_MAX_CHANCE = 100
 -- Tabla global para guardar la probabilidad de cada jugador
 local playerChances = {}
 
+-- Anti-spam de trampas por jugador
+local trapCooldowns = {}
+local TRAP_COOLDOWN_TIME = 3
+
 local function getCharacterPlayer(otherPart)
     if not otherPart then
         return nil
@@ -59,6 +63,15 @@ local function onTrapTouched(trapPart, otherPart)
     if not player then
         return
     end
+
+    if trapCooldowns[player] then
+        return
+    end
+
+    trapCooldowns[player] = true
+    task.delay(TRAP_COOLDOWN_TIME, function()
+        trapCooldowns[player] = nil
+    end)
 
     local chance = playerChances[player]
     if not chance then
@@ -139,4 +152,5 @@ end)
 
 Players.PlayerRemoving:Connect(function(player)
     playerChances[player] = nil
+    trapCooldowns[player] = nil
 end)
