@@ -19,6 +19,12 @@ local playerChances = {}
 local trapCooldowns = {}
 local TRAP_COOLDOWN_TIME = 3
 
+local function setPlayerChance(player, value)
+    local clamped = math.clamp(value, 1, MAX_CHANCE)
+    playerChances[player] = clamped
+    player:SetAttribute("ChancePercent", clamped)
+end
+
 local function getCharacterPlayer(otherPart)
     if not otherPart then
         return nil
@@ -124,14 +130,14 @@ end)
 Players.PlayerAdded:Connect(function(player)
     print(player.Name .. " se unió al juego")
 
-    playerChances[player] = START_CHANCE
+    setPlayerChance(player, START_CHANCE)
     print("Probabilidad inicial de " .. player.Name .. ": " .. playerChances[player] .. "%")
 
     player.CharacterAdded:Connect(function(character)
         local humanoid = character:WaitForChild("Humanoid")
 
         humanoid.Died:Connect(function()
-            playerChances[player] = START_CHANCE
+            setPlayerChance(player, START_CHANCE)
             print(player.Name .. " murió. Probabilidad reiniciada a " .. playerChances[player] .. "%")
         end)
     end)
@@ -144,7 +150,7 @@ Players.PlayerAdded:Connect(function(player)
                 break
             end
 
-            playerChances[player] = math.min(playerChances[player] + INCREASE_AMOUNT, MAX_CHANCE)
+            setPlayerChance(player, playerChances[player] + INCREASE_AMOUNT)
             print("Probabilidad actual de " .. player.Name .. ": " .. playerChances[player] .. "%")
         end
     end)
@@ -153,4 +159,5 @@ end)
 Players.PlayerRemoving:Connect(function(player)
     playerChances[player] = nil
     trapCooldowns[player] = nil
+    player:SetAttribute("ChancePercent", nil)
 end)

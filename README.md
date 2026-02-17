@@ -1,223 +1,53 @@
-# Sistema de probabilidad + trampas (Paso 4)
+# Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-En este paso ya quedó implementado lo que faltaba:
+Ahora tienes 2 scripts conectados:
 
-1. Guardar la probabilidad de cada jugador en una **tabla global**.
-2. Detectar cuando un jugador entra en una **zona de trampa**.
-3. Comparar:
-   - `% del jugador`
-   - `rango de activación de la trampa`
-   - `tirada aleatoria`
-
-Si coincide, se activa el evento (por ahora: muerte).
-
-Además se agregó anti-spam: cada jugador tiene un cooldown de 3 segundos por trampa para evitar múltiples activaciones por `Touched`.
-
----
+1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
+2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
 
 ## Dónde va cada archivo (Roblox Studio)
 
-### 1) Script principal
-
+### 1) Sistema central
+- **Archivo:** `PlayerChanceSystem.server.lua`
 - **Ubicación:** `ServerScriptService`
 - **Tipo:** `Script`
 - **Nombre sugerido:** `PlayerChanceSystem`
-- **Contenido:** copia `PlayerChanceSystem.server.lua`
 
-### 2) Zonas de trampa (Parts)
+### 2) Script de la puerta
+- **Archivo:** `DoorTrap.server.lua`
+- **Ubicación:** dentro del **Model de la puerta**
+- **Tipo:** `Script`
+- **Nombre sugerido:** `DoorTrap`
 
-- Crea uno o varios `Part` en el mapa (por ejemplo dentro de `Workspace/Traps`).
-- A cada `Part` de trampa agrégale el tag: **`TrapZone`**.
-- A cada `Part` puedes poner atributos:
-  - `MinChance` (número)
-  - `MaxChance` (número)
+## Estructura del modelo de puerta
 
-Si no pones atributos, usa por defecto `1` a `100`.
+Dentro del modelo (padre del script `DoorTrap`) debes tener:
 
----
+- `Puerta1` (Part)
+- `Puerta2` (Part)
+- `PosicionPuerta1` (Part/Attachment de referencia de destino)
+- `PosicionPuerta2` (Part/Attachment de referencia de destino)
+- `Detector1` (Part)
+- `Detector2` (Part)
 
-## Script completo
+## Comportamiento pedido
 
-```lua
-local Players = game:GetService("Players")
-local CollectionService = game:GetService("CollectionService")
+- Si el jugador tiene **menos de 15%** (`ChancePercent < 15`):
+  - la puerta funciona normal (abre/cierra con tween).
+- Si el jugador tiene **15% o más** (`ChancePercent >= 15`):
+  - se activa trampa,
+  - la puerta se mueve,
+  - y el jugador muere.
 
--- Configuración general de probabilidad
-local START_CHANCE = 1
-local INCREASE_AMOUNT = 1
-local INCREASE_EVERY_SECONDS = 10
-local MAX_CHANCE = 100
+## Nota técnica importante
 
--- Configuración de zonas de trampa
-local TRAP_TAG = "TrapZone"
-local DEFAULT_TRAP_MIN_CHANCE = 1
-local DEFAULT_TRAP_MAX_CHANCE = 100
+`PlayerChanceSystem` ahora guarda la probabilidad también en atributo del jugador:
 
--- Tabla global para guardar la probabilidad de cada jugador
-local playerChances = {}
+- `player:SetAttribute("ChancePercent", valor)`
 
--- Anti-spam de trampas por jugador
-local trapCooldowns = {}
-local TRAP_COOLDOWN_TIME = 3
+Eso permite que `DoorTrap` lea el porcentaje sin depender de variables locales.
 
-local function getCharacterPlayer(otherPart)
-    if not otherPart then
-        return nil
-    end
+## Anti-spam
 
-    local character = otherPart.Parent
-    if not character then
-        return nil
-    end
-
-    return Players:GetPlayerFromCharacter(character)
-end
-
-local function getTrapChanceRange(trapPart)
-    local minChance = trapPart:GetAttribute("MinChance") or DEFAULT_TRAP_MIN_CHANCE
-    local maxChance = trapPart:GetAttribute("MaxChance") or DEFAULT_TRAP_MAX_CHANCE
-
-    minChance = math.clamp(minChance, 1, 100)
-    maxChance = math.clamp(maxChance, 1, 100)
-
-    if minChance > maxChance then
-        minChance, maxChance = maxChance, minChance
-    end
-
-    return minChance, maxChance
-end
-
-local function activateTrapForPlayer(player)
-    local character = player.Character
-    if not character then
-        return
-    end
-
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid and humanoid.Health > 0 then
-        humanoid.Health = 0
-    end
-end
-
-local function onTrapTouched(trapPart, otherPart)
-    local player = getCharacterPlayer(otherPart)
-    if not player then
-        return
-    end
-
-    if trapCooldowns[player] then
-        return
-    end
-
-    trapCooldowns[player] = true
-    task.delay(TRAP_COOLDOWN_TIME, function()
-        trapCooldowns[player] = nil
-    end)
-
-    local chance = playerChances[player]
-    if not chance then
-        return
-    end
-
-    local minChance, maxChance = getTrapChanceRange(trapPart)
-    if chance < minChance or chance > maxChance then
-        return
-    end
-
-    local randomNumber = math.random(1, 100)
-    print(
-        string.format(
-            "[TRAMPA] %s tocó %s | Chance=%d%% | Rango=%d-%d%% | Random=%d",
-            player.Name,
-            trapPart.Name,
-            chance,
-            minChance,
-            maxChance,
-            randomNumber
-        )
-    )
-
-    if randomNumber <= chance then
-        print("✅ Trampa activada para " .. player.Name)
-        activateTrapForPlayer(player)
-    end
-end
-
-local function connectTrapPart(trapPart)
-    if not trapPart:IsA("BasePart") then
-        warn("[TRAMPA] El objeto con tag TrapZone no es BasePart: " .. trapPart:GetFullName())
-        return
-    end
-
-    trapPart.Touched:Connect(function(otherPart)
-        onTrapTouched(trapPart, otherPart)
-    end)
-end
-
-for _, trapPart in ipairs(CollectionService:GetTagged(TRAP_TAG)) do
-    connectTrapPart(trapPart)
-end
-
-CollectionService:GetInstanceAddedSignal(TRAP_TAG):Connect(function(trapPart)
-    connectTrapPart(trapPart)
-end)
-
-Players.PlayerAdded:Connect(function(player)
-    print(player.Name .. " se unió al juego")
-
-    playerChances[player] = START_CHANCE
-    print("Probabilidad inicial de " .. player.Name .. ": " .. playerChances[player] .. "%")
-
-    player.CharacterAdded:Connect(function(character)
-        local humanoid = character:WaitForChild("Humanoid")
-
-        humanoid.Died:Connect(function()
-            playerChances[player] = START_CHANCE
-            print(player.Name .. " murió. Probabilidad reiniciada a " .. playerChances[player] .. "%")
-        end)
-    end)
-
-    task.spawn(function()
-        while player.Parent do
-            task.wait(INCREASE_EVERY_SECONDS)
-
-            if not playerChances[player] then
-                break
-            end
-
-            playerChances[player] = math.min(playerChances[player] + INCREASE_AMOUNT, MAX_CHANCE)
-            print("Probabilidad actual de " .. player.Name .. ": " .. playerChances[player] .. "%")
-        end
-    end)
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-    playerChances[player] = nil
-    trapCooldowns[player] = nil
-end)
-```
-
----
-
-## Cómo configurar una trampa rápido (ejemplo)
-
-- Part llamado `Trap_Low`:
-  - `MinChance = 1`
-  - `MaxChance = 30`
-
-- Part llamado `Trap_Mid`:
-  - `MinChance = 31`
-  - `MaxChance = 70`
-
-- Part llamado `Trap_High`:
-  - `MinChance = 71`
-  - `MaxChance = 100`
-
-Así cada zona responde a distintos niveles de probabilidad del jugador.
-
-
-## Anti-spam (importante)
-
-- `Touched` puede dispararse muchas veces seguidas mientras el jugador sigue dentro de la trampa.
-- Por eso ahora existe `trapCooldowns[player]` con `TRAP_COOLDOWN_TIME = 3`.
-- Resultado: cada jugador solo puede procesar una activación de trampa cada 3 segundos.
+- En `PlayerChanceSystem` existe anti-spam por jugador para trampas de `Touched`.
+- En `DoorTrap` existe cooldown por detector para evitar múltiples activaciones instantáneas.
