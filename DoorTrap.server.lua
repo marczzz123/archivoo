@@ -14,31 +14,49 @@ local Detector2 = model.Detector2
 local TRAP_CHANCE_THRESHOLD = 15
 local DETECTOR_COOLDOWN_TIME = 2
 
+-- Velocidades de movimiento
+local OPEN_TIME = 1
+local NORMAL_CLOSE_TIME = 1
+local TRAP_CLOSE_TIME = 0.25
+local HOLD_OPEN_TIME = 0.2
+
 local detectorCooldowns = {}
 
-local infoPuertas = TweenInfo.new(
-	1,
-	Enum.EasingStyle.Linear,
-	Enum.EasingDirection.In,
-	0,
-	true,
-	0
-)
+local puerta1ClosedCFrame = Puerta1.CFrame
+local puerta2ClosedCFrame = Puerta2.CFrame
+local puerta1OpenCFrame = PosicionPuerta1.CFrame
+local puerta2OpenCFrame = PosicionPuerta2.CFrame
 
-local abrirPuerta1 = {
-	CFrame = CFrame.new(PosicionPuerta1.Position)
-}
+local function createDoorTween(target1, target2, duration)
+	local tweenInfo = TweenInfo.new(
+		duration,
+		Enum.EasingStyle.Linear,
+		Enum.EasingDirection.In,
+		0,
+		false,
+		0
+	)
 
-local abrirPuerta2 = {
-	CFrame = CFrame.new(PosicionPuerta2.Position)
-}
+	local tween1 = TweenService:Create(Puerta1, tweenInfo, { CFrame = target1 })
+	local tween2 = TweenService:Create(Puerta2, tweenInfo, { CFrame = target2 })
 
-local movimientoPuerta1 = TweenService:Create(Puerta1, infoPuertas, abrirPuerta1)
-local movimientoPuerta2 = TweenService:Create(Puerta2, infoPuertas, abrirPuerta2)
+	return tween1, tween2
+end
 
-local function openDoorNormally()
-	movimientoPuerta1:Play()
-	movimientoPuerta2:Play()
+local function playDoorCycle(closeDuration, onCloseStart)
+	local openTween1, openTween2 = createDoorTween(puerta1OpenCFrame, puerta2OpenCFrame, OPEN_TIME)
+	openTween1:Play()
+	openTween2:Play()
+
+	task.delay(OPEN_TIME + HOLD_OPEN_TIME, function()
+		if onCloseStart then
+			onCloseStart()
+		end
+
+		local closeTween1, closeTween2 = createDoorTween(puerta1ClosedCFrame, puerta2ClosedCFrame, closeDuration)
+		closeTween1:Play()
+		closeTween2:Play()
+	end)
 end
 
 local function processDetectorTouch(detector, hit)
@@ -66,18 +84,17 @@ local function processDetectorTouch(detector, hit)
 	local chance = player and player:GetAttribute("ChancePercent") or 0
 
 	if chance >= TRAP_CHANCE_THRESHOLD then
-		print(string.format("[PUERTA-TRAMPA] %s tiene %d%% (>= %d%%). Activando trampa.", playerName, chance, TRAP_CHANCE_THRESHOLD))
-		openDoorNormally()
-
-		if humanoid.Health > 0 then
-			humanoid.Health = 0
-		end
-
+		print(string.format("[PUERTA-TRAMPA] %s tiene %d%% (>= %d%%). Cierre rápido.", playerName, chance, TRAP_CHANCE_THRESHOLD))
+		playDoorCycle(TRAP_CLOSE_TIME, function()
+			if humanoid.Health > 0 then
+				humanoid.Health = 0
+			end
+		end)
 		return
 	end
 
-	print(string.format("[PUERTA] %s tiene %d%% (< %d%%). Puerta normal.", playerName, chance, TRAP_CHANCE_THRESHOLD))
-	openDoorNormally()
+	print(string.format("[PUERTA] %s tiene %d%% (< %d%%). Cierre normal.", playerName, chance, TRAP_CHANCE_THRESHOLD))
+	playDoorCycle(NORMAL_CLOSE_TIME)
 end
 
 Detector1.Touched:Connect(function(hit)

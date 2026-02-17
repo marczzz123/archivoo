@@ -25,23 +25,34 @@ Dentro del modelo (padre del script `DoorTrap`) debes tener:
 
 - `Puerta1` (Part)
 - `Puerta2` (Part)
-- `PosicionPuerta1` (Part/Attachment de referencia de destino)
-- `PosicionPuerta2` (Part/Attachment de referencia de destino)
+- `PosicionPuerta1` (Part de destino de apertura)
+- `PosicionPuerta2` (Part de destino de apertura)
 - `Detector1` (Part)
 - `Detector2` (Part)
 
-## Comportamiento pedido
+## Lógica solicitada
 
 - Si el jugador tiene **menos de 15%** (`ChancePercent < 15`):
-  - la puerta funciona normal (abre/cierra con tween).
+  - la puerta abre normal,
+  - y cierra con velocidad estándar.
+
 - Si el jugador tiene **15% o más** (`ChancePercent >= 15`):
-  - se activa trampa,
-  - la puerta se mueve,
-  - y el jugador muere.
+  - la puerta abre normal,
+  - y cierra más rápido (modo trampa),
+  - provocando muerte del jugador.
+
+## Configuración de velocidades (DoorTrap)
+
+En `DoorTrap.server.lua` puedes ajustar:
+
+- `OPEN_TIME = 1`
+- `NORMAL_CLOSE_TIME = 1`
+- `TRAP_CLOSE_TIME = 0.25`
+- `HOLD_OPEN_TIME = 0.2`
 
 ## Nota técnica importante
 
-`PlayerChanceSystem` ahora guarda la probabilidad también en atributo del jugador:
+`PlayerChanceSystem` guarda la probabilidad en atributo del jugador:
 
 - `player:SetAttribute("ChancePercent", valor)`
 
