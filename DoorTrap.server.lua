@@ -20,6 +20,10 @@ local NORMAL_CLOSE_TIME = 1
 local TRAP_CLOSE_TIME = 0.25
 local HOLD_OPEN_TIME = 0.2
 
+-- Ragdoll opcional al aplastar
+local ENABLE_RAGDOLL_ON_CRUSH = true
+local RAGDOLL_FREEZE_TIME = 1.5
+
 local detectorCooldowns = {}
 local crushedCharacters = {}
 
@@ -76,6 +80,23 @@ local function playDoorCycle(closeDuration, isTrapMode)
 	end)
 end
 
+local function applySimpleRagdoll(humanoid)
+	if not ENABLE_RAGDOLL_ON_CRUSH then
+		return
+	end
+
+	humanoid.BreakJointsOnDeath = false
+	humanoid.RequiresNeck = false
+	humanoid.PlatformStand = true
+	humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+
+	task.delay(RAGDOLL_FREEZE_TIME, function()
+		if humanoid and humanoid.Parent and humanoid.Health <= 0 then
+			humanoid.PlatformStand = false
+		end
+	end)
+end
+
 local function tryCrushPlayer(hit)
 	if not puertaCerrando or not trapDamageEnabled then
 		return
@@ -89,6 +110,7 @@ local function tryCrushPlayer(hit)
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if humanoid and humanoid.Health > 0 then
 		crushedCharacters[character] = true
+		applySimpleRagdoll(humanoid)
 		humanoid.Health = 0
 
 		task.delay(1, function()

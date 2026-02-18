@@ -64,6 +64,8 @@ En `DoorTrap.server.lua` puedes ajustar:
 - `NORMAL_CLOSE_TIME = 1`
 - `TRAP_CLOSE_TIME = 0.25`
 - `HOLD_OPEN_TIME = 0.2`
+- `ENABLE_RAGDOLL_ON_CRUSH = true`
+- `RAGDOLL_FREEZE_TIME = 1.5`
 
 ## Nota técnica importante
 
@@ -111,3 +113,13 @@ Se actualiza automáticamente cuando cambia el atributo `ChancePercent` y se rec
 ## FirstPersonEnforcer
 
 Este LocalScript fuerza cámara en primera persona (`LockFirstPerson`) al cargar, al respawn y con verificación periódica cada 3 segundos.
+
+
+## ¿Ragdoll en la puerta?
+
+Sí, se puede y **ya quedó integrado en el mismo `DoorTrap.server.lua`** para mantener todo junto y simple:
+
+- Cuando la puerta aplasta, primero aplica un ragdoll simple (`Physics` + `PlatformStand`) y luego mata al jugador.
+- Si quieres desactivarlo, cambia `ENABLE_RAGDOLL_ON_CRUSH = false`.
+
+Si luego quieres un ragdoll más avanzado (con constraints), ahí sí conviene moverlo a un `ModuleScript` aparte para reutilizar en otras trampas.
