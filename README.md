@@ -1,11 +1,12 @@
 # Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-Ahora tienes 4 scripts conectados:
+Ahora tienes 5 scripts conectados:
 
 1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
 2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
 3. `RiskBillboardManager.client.lua` (UI sobre la cabeza con el `%` de riesgo).
 4. `FirstPersonEnforcer.client.lua` (fuerza cámara en primera persona).
+5. `RockTrap.server.lua` (trampa de roca con daño + ragdoll compatible con `%`).
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -32,6 +33,12 @@ Ahora tienes 4 scripts conectados:
 - **Ubicación:** `StarterPlayer > StarterPlayerScripts`
 - **Tipo:** `LocalScript`
 - **Nombre sugerido:** `FirstPersonEnforcer`
+
+### 5) Trampa de roca
+- **Archivo:** `RockTrap.server.lua`
+- **Ubicación:** dentro del `Part` roca en `Workspace`
+- **Tipo:** `Script`
+- **Nombre sugerido:** `RockTrap`
 
 ## Estructura del modelo de puerta
 
@@ -128,3 +135,15 @@ Si luego quieres un ragdoll más avanzado (con constraints), ahí sí conviene m
 ## Corrección: muerte consistente con ragdoll
 
 Si alguna vez ves que el jugador queda vivo con poca vida en modo trampa, `DoorTrap` ahora usa `forceKillHumanoid()` después del ragdoll para forzar estado `Dead` con fallback adicional.
+
+
+## RockTrap compatible con ChancePercent
+
+`RockTrap.server.lua` quedó adaptado para usar el sistema global de probabilidad:
+
+- Lee `player:GetAttribute("ChancePercent")` si `USE_CHANCE_PERCENT = true`.
+- Usa ese valor (1-100) como probabilidad real de activación de la roca.
+- Mantiene cooldown por jugador para evitar spam.
+- Aplica daño + ragdoll simple cuando activa.
+
+Si quieres volver al comportamiento fijo (por ejemplo 5%), pon `USE_CHANCE_PERCENT = false` y ajusta `TRAP_SUCCESS_CHANCE`.
