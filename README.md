@@ -123,3 +123,8 @@ Sí, se puede y **ya quedó integrado en el mismo `DoorTrap.server.lua`** para m
 - Si quieres desactivarlo, cambia `ENABLE_RAGDOLL_ON_CRUSH = false`.
 
 Si luego quieres un ragdoll más avanzado (con constraints), ahí sí conviene moverlo a un `ModuleScript` aparte para reutilizar en otras trampas.
+
+
+## Corrección: muerte consistente con ragdoll
+
+Si alguna vez ves que el jugador queda vivo con poca vida en modo trampa, `DoorTrap` ahora usa `forceKillHumanoid()` después del ragdoll para forzar estado `Dead` con fallback adicional.

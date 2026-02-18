@@ -97,6 +97,26 @@ local function applySimpleRagdoll(humanoid)
 	end)
 end
 
+local function forceKillHumanoid(humanoid)
+	if not humanoid or humanoid.Health <= 0 then
+		return
+	end
+
+	-- Intento principal
+	humanoid.Health = 0
+	humanoid:TakeDamage(humanoid.MaxHealth)
+	humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+
+	-- Fallback por si algún estado externo evita morir al instante
+	task.delay(0.1, function()
+		if humanoid and humanoid.Parent and humanoid.Health > 0 then
+			humanoid:TakeDamage(1000000)
+			humanoid.Health = 0
+			humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+		end
+	end)
+end
+
 local function tryCrushPlayer(hit)
 	if not puertaCerrando or not trapDamageEnabled then
 		return
@@ -111,7 +131,7 @@ local function tryCrushPlayer(hit)
 	if humanoid and humanoid.Health > 0 then
 		crushedCharacters[character] = true
 		applySimpleRagdoll(humanoid)
-		humanoid.Health = 0
+		forceKillHumanoid(humanoid)
 
 		task.delay(1, function()
 			crushedCharacters[character] = nil
