@@ -185,11 +185,12 @@ Además mantiene una capa de eventos intermitentes (`EVENT_SOUNDS`) con interval
 
 Configuración clave:
 
-- `AMBIENT_LAYERS = { low, medium, high, extreme }` con `{ id, volume }`.
+- `AMBIENT_LAYERS = { low, medium, high, extreme }` con `{ id, volume, name }` para comportamiento individual.
 - `EVENT_SOUNDS` por tier.
 - `THRESHOLDS` (incluye `heartbeatFast`).
 - `USE_CAMERA_AUDIO` para audio interno en `workspace.CurrentCamera`.
 - `VOLUME_TWEEN_TIME` para crossfade suave entre capas al cambiar de porcentaje.
+- En `extreme`, puedes diferenciar por `name` (ej. `Heartbeat`, `Breathing`, `Pressure`) para curvas de volumen/velocidad distintas.
 
 ## ChanceEffects (Lighting)
 

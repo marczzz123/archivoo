@@ -16,7 +16,9 @@ local AMBIENT_LAYERS = {
 		{ id = 113662653409849, volume = 0.5 }, -- tensión grave
 	},
 	extreme = {
-		{ id = 0, volume = 0.6 }, -- latido corazón (reemplaza por tu ID)
+		{ id = 134914789373072, volume = 1, name = "Heartbeat" },
+		{ id = 223344556677889, volume = 0.6, name = "Breathing" },
+		{ id = 998877665544332, volume = 0.4, name = "Pressure" },
 	},
 }
 
@@ -127,7 +129,7 @@ local function setupAmbientSounds()
 		for i, data in ipairs(list) do
 			if data.id ~= 0 then
 				local sound = Instance.new("Sound")
-				sound.Name = string.format("AmbientLayer_%s_%d", tier, i)
+				sound.Name = data.name or string.format("AmbientLayer_%s_%d", tier, i)
 				sound.SoundId = "rbxassetid://" .. data.id
 				sound.Looped = true
 				sound.Volume = 0
@@ -140,6 +142,7 @@ local function setupAmbientSounds()
 				table.insert(ambientSounds[tier], {
 					sound = sound,
 					base = data.volume or 1,
+					name = data.name,
 				})
 			end
 		end
@@ -174,8 +177,21 @@ local function updateAmbientVolumes()
 
 					if tier == "extreme" then
 						local normalized = math.clamp((percentage - THRESHOLDS.extreme) / (100 - THRESHOLDS.extreme), 0, 1)
-						sound.PlaybackSpeed = 1 + normalized * 0.4
-						targetVolume = math.clamp(targetVolume * normalized, 0, 1)
+
+						if sound.Name == "Heartbeat" then
+							sound.PlaybackSpeed = 1 + normalized * 0.4
+							targetVolume = targetVolume * normalized
+						elseif sound.Name == "Breathing" then
+							sound.PlaybackSpeed = 1
+							targetVolume = targetVolume * (normalized ^ 1.5)
+						elseif sound.Name == "Pressure" then
+							sound.PlaybackSpeed = 1
+						else
+							sound.PlaybackSpeed = 1
+							targetVolume = targetVolume * normalized
+						end
+
+						targetVolume = math.clamp(targetVolume, 0, 1)
 					else
 						sound.PlaybackSpeed = 1
 					end
