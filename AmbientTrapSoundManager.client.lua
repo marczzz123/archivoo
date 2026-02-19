@@ -5,12 +5,12 @@ local player = Players.LocalPlayer
 -- Sound IDs - Replace these with your actual sound IDs
 local SOUND_IDS = {
 	low = {
-		81877238273397,
-		131780609989651,
+		{ id = 81877238273397, volume = 0.4 }, -- viento
+		{ id = 131780609989651, volume = 0.25 }, -- ventilación
 	},
-	medium = { 0 }, -- Placeholder for medium percentage sound (30-59%)
-	high = { 0 }, -- Placeholder for high percentage sound (60-84%)
-	extreme = { 0 }, -- Placeholder for extreme percentage sound (85-100%)
+	medium = { { id = 0 } }, -- Placeholder for medium percentage sound (30-59%)
+	high = { { id = 0 } }, -- Placeholder for high percentage sound (60-84%)
+	extreme = { { id = 0 } }, -- Placeholder for extreme percentage sound (85-100%)
 }
 
 -- Percentage thresholds for different sound levels
@@ -37,9 +37,9 @@ local function getSoundListForPercentage(percentage)
 	end
 
 	local valid = {}
-	for _, id in ipairs(soundTable) do
-		if id ~= 0 then
-			table.insert(valid, id)
+	for _, data in ipairs(soundTable) do
+		if data.id ~= 0 then
+			table.insert(valid, data)
 		end
 	end
 
@@ -89,15 +89,18 @@ local function updateAmbientSound()
 
 	if isLowTier then
 		-- LOW tier: reproduce TODOS los sonidos a la vez
-		for i, id in ipairs(soundIds) do
+		for i, data in ipairs(soundIds) do
 			local sound = Instance.new("Sound")
 			sound.Name = "AmbientTrapSound_Low_" .. i
 			sound.Looped = true
 			sound.RollOffMode = Enum.RollOffMode.Linear
 			sound.RollOffMinDistance = 10
 			sound.RollOffMaxDistance = 50
-			sound.SoundId = "rbxassetid://" .. id
-			sound.Volume = math.clamp(baseVolume * LOW_VOLUME_MULTIPLIER, 0, 1)
+			sound.SoundId = "rbxassetid://" .. data.id
+
+			local finalVolume = baseVolume * data.volume * LOW_VOLUME_MULTIPLIER
+			sound.Volume = math.clamp(finalVolume, 0, 1)
+
 			sound.Pitch = pitch
 			sound.Parent = character
 			sound:Play()
@@ -106,14 +109,14 @@ local function updateAmbientSound()
 	end
 
 	-- medium/high/extreme: elegir uno aleatorio
-	local id = soundIds[math.random(1, #soundIds)]
+	local data = soundIds[math.random(1, #soundIds)]
 	local sound = Instance.new("Sound")
 	sound.Name = "AmbientTrapSound"
 	sound.Looped = true
 	sound.RollOffMode = Enum.RollOffMode.Linear
 	sound.RollOffMinDistance = 10
 	sound.RollOffMaxDistance = 50
-	sound.SoundId = "rbxassetid://" .. id
+	sound.SoundId = "rbxassetid://" .. data.id
 	sound.Volume = baseVolume
 	sound.Pitch = pitch
 	sound.Parent = character

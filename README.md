@@ -163,4 +163,4 @@ Este LocalScript reproduce audio ambiente según `ChancePercent`:
 - LOW (<30%): reproduce **todos** los sonidos de `SOUND_IDS.low` al mismo tiempo.
 - MEDIUM/HIGH/EXTREME: reproduce 1 sonido aleatorio del grupo correspondiente.
 
-También puedes ajustar volumen específico de LOW con `LOW_VOLUME_MULTIPLIER`.
+También puedes ajustar volumen específico de LOW con `LOW_VOLUME_MULTIPLIER` y con `volume` individual por sonido dentro de `SOUND_IDS.low` (ej. `{ id = ..., volume = 0.4 }`).
