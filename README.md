@@ -1,12 +1,13 @@
 # Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-Ahora tienes 5 scripts conectados:
+Ahora tienes 6 scripts conectados:
 
 1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
 2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
 3. `RiskBillboardManager.client.lua` (UI sobre la cabeza con el `%` de riesgo).
 4. `FirstPersonEnforcer.client.lua` (fuerza cámara en primera persona).
 5. `RockTrap.server.lua` (trampa de roca con daño + ragdoll compatible con `%`).
+6. `AmbientTrapSoundManager.client.lua` (sonido ambiente por riesgo).
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -39,6 +40,12 @@ Ahora tienes 5 scripts conectados:
 - **Ubicación:** dentro del `Part` roca en `Workspace`
 - **Tipo:** `Script`
 - **Nombre sugerido:** `RockTrap`
+
+### 6) Sonido ambiente por riesgo
+- **Archivo:** `AmbientTrapSoundManager.client.lua`
+- **Ubicación:** `StarterPlayer > StarterPlayerScripts`
+- **Tipo:** `LocalScript`
+- **Nombre sugerido:** `AmbientTrapSoundManager`
 
 ## Estructura del modelo de puerta
 
@@ -147,3 +154,13 @@ Si alguna vez ves que el jugador queda vivo con poca vida en modo trampa, `DoorT
 - Aplica daño + ragdoll simple cuando activa.
 
 Si quieres volver al comportamiento fijo (por ejemplo 5%), pon `USE_CHANCE_PERCENT = false` y ajusta `TRAP_SUCCESS_CHANCE`.
+
+
+## AmbientTrapSoundManager
+
+Este LocalScript reproduce audio ambiente según `ChancePercent`:
+
+- LOW (<30%): reproduce **todos** los sonidos de `SOUND_IDS.low` al mismo tiempo.
+- MEDIUM/HIGH/EXTREME: reproduce 1 sonido aleatorio del grupo correspondiente.
+
+También puedes ajustar volumen específico de LOW con `LOW_VOLUME_MULTIPLIER`.
