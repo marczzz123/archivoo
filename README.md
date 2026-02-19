@@ -158,9 +158,15 @@ Si quieres volver al comportamiento fijo (por ejemplo 5%), pon `USE_CHANCE_PERCE
 
 ## AmbientTrapSoundManager
 
-Este LocalScript reproduce audio ambiente según `ChancePercent`:
+Este LocalScript reproduce audio ambiente según `ChancePercent` usando capas por tier y eventos aleatorios de tensión:
 
-- LOW (<30%): reproduce **todos** los sonidos de `SOUND_IDS.low` al mismo tiempo.
-- MEDIUM/HIGH/EXTREME: reproduce 1 sonido aleatorio del grupo correspondiente.
+- LOW/MEDIUM/HIGH/EXTREME: reproduce un sonido aleatorio del tier correspondiente (con `{ id, volume }`).
+- Además dispara `EVENT_SOUNDS` aleatorios cada cierto tiempo para jump-scares suaves.
+- La frecuencia aumenta con el porcentaje (`calculateInterval`): a mayor riesgo, menor intervalo.
 
-También puedes ajustar volumen específico de LOW con `LOW_VOLUME_MULTIPLIER` y con `volume` individual por sonido dentro de `SOUND_IDS.low` (ej. `{ id = ..., volume = 0.4 }`).
+Puedes ajustar:
+
+- `SOUND_IDS` con `id` y `volume` por sonido.
+- `EVENT_SOUNDS` por tier.
+- `MIN_INTERVAL` y `MAX_INTERVAL`.
+- curvas de intensidad en `calculateBaseVolume`, `calculateTensionMultiplier` y `calculatePitch`.
