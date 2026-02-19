@@ -178,6 +178,7 @@ Comportamiento esperado:
 - 30–59%: LOW + MEDIUM.
 - 60–84%: LOW + MEDIUM + HIGH.
 - 85%+: LOW + MEDIUM + HIGH + EXTREME (ej. latido).
+- 85%+: el tier `extreme` aparece de forma gradual (volumen progresivo).
 - 95%+: el tier `extreme` acelera (`PlaybackSpeed`) para subir tensión.
 
 Además mantiene una capa de eventos intermitentes (`EVENT_SOUNDS`) con intervalo dinámico según `ChancePercent`.
@@ -188,6 +189,7 @@ Configuración clave:
 - `EVENT_SOUNDS` por tier.
 - `THRESHOLDS` (incluye `heartbeatFast`).
 - `USE_CAMERA_AUDIO` para audio interno en `workspace.CurrentCamera`.
+- `VOLUME_TWEEN_TIME` para crossfade suave entre capas al cambiar de porcentaje.
 
 ## ChanceEffects (Lighting)
 

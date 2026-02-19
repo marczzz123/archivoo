@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
@@ -39,8 +40,10 @@ local MAX_EVENT_INTERVAL = 8
 
 -- Audio interno/cinemático (en cámara)
 local USE_CAMERA_AUDIO = true
+local VOLUME_TWEEN_TIME = 0.6
 
 local ambientSounds = {}
+local volumeTweens = {}
 local eventLoop = nil
 
 local function calculateBaseVolume(percentage)
@@ -107,6 +110,7 @@ local function cleanupAmbientSounds()
 		end
 	end
 	ambientSounds = {}
+	volumeTweens = {}
 end
 
 local function setupAmbientSounds()
@@ -163,21 +167,31 @@ local function updateAmbientVolumes()
 		for _, entry in ipairs(entries) do
 			local sound = entry.sound
 			if sound and sound.Parent then
-				if active then
-					sound.Volume = math.clamp(baseVolume * entry.base * tensionMultiplier, 0, 1)
-					sound.Pitch = pitch
+				local targetVolume = 0
 
-					-- Comportamiento especial: latido más rápido en 95%+
-					if tier == "extreme" and percentage >= THRESHOLDS.heartbeatFast then
-						sound.PlaybackSpeed = 1.25
-					elseif tier == "extreme" then
-						sound.PlaybackSpeed = 1
+				if active then
+					targetVolume = math.clamp(baseVolume * entry.base * tensionMultiplier, 0, 1)
+
+					if tier == "extreme" then
+						local normalized = math.clamp((percentage - THRESHOLDS.extreme) / (100 - THRESHOLDS.extreme), 0, 1)
+						sound.PlaybackSpeed = 1 + normalized * 0.4
+						targetVolume = math.clamp(targetVolume * normalized, 0, 1)
 					else
 						sound.PlaybackSpeed = 1
 					end
-				else
-					sound.Volume = 0
 				end
+
+				sound.Pitch = pitch
+
+				if volumeTweens[sound] then
+					volumeTweens[sound]:Cancel()
+				end
+
+				local tween = TweenService:Create(sound, TweenInfo.new(VOLUME_TWEEN_TIME), {
+					Volume = targetVolume,
+				})
+				volumeTweens[sound] = tween
+				tween:Play()
 			end
 		end
 	end
