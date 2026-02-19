@@ -158,15 +158,21 @@ Si quieres volver al comportamiento fijo (por ejemplo 5%), pon `USE_CHANCE_PERCE
 
 ## AmbientTrapSoundManager
 
-Este LocalScript reproduce audio ambiente según `ChancePercent` usando capas por tier y eventos aleatorios de tensión:
+`AmbientTrapSoundManager.client.lua` ahora está separado en **2 capas**:
 
-- LOW/MEDIUM/HIGH/EXTREME: reproduce un sonido aleatorio del tier correspondiente (con `{ id, volume }`).
-- Además dispara `EVENT_SOUNDS` aleatorios cada cierto tiempo para jump-scares suaves.
-- La frecuencia aumenta con el porcentaje (`calculateInterval`): a mayor riesgo, menor intervalo.
+1. **Ambient Loop Layer (simultánea)**
+   - Crea varias capas de sonido (`AMBIENT_SOUNDS`) una sola vez por respawn.
+   - Todas quedan en `Looped = true` y suenan al mismo tiempo (viento + ventilación + etc.).
+   - No se recrean por intervalo; solo se actualiza `Volume` y `Pitch` cuando cambia `ChancePercent`.
 
-Puedes ajustar:
+2. **Event Layer (intermitente)**
+   - Reproduce sonidos sueltos de `EVENT_SOUNDS` cada cierto tiempo.
+   - El intervalo es dinámico con `ChancePercent` (`MIN_EVENT_INTERVAL` / `MAX_EVENT_INTERVAL`).
+   - Cada evento se crea y destruye con `Debris`.
 
-- `SOUND_IDS` con `id` y `volume` por sonido.
-- `EVENT_SOUNDS` por tier.
-- `MIN_INTERVAL` y `MAX_INTERVAL`.
-- curvas de intensidad en `calculateBaseVolume`, `calculateTensionMultiplier` y `calculatePitch`.
+Configuración clave:
+
+- `AMBIENT_SOUNDS = { { id, volume }, ... }`
+- `EVENT_SOUNDS` por tier (`low`, `medium`, `high`, `extreme`)
+- `THRESHOLDS` para tiers
+- `calculateBaseVolume`, `calculatePitch`, `calculateTensionMultiplier`
