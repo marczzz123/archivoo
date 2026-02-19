@@ -37,6 +37,9 @@ local THRESHOLDS = {
 local MIN_EVENT_INTERVAL = 3
 local MAX_EVENT_INTERVAL = 8
 
+-- Audio interno/cinemático (en cámara)
+local USE_CAMERA_AUDIO = true
+
 local ambientSounds = {}
 local eventLoop = nil
 
@@ -50,6 +53,10 @@ local function calculatePitch(percentage)
 end
 
 local function calculateTensionMultiplier(percentage)
+	if percentage < THRESHOLDS.medium then
+		return 1
+	end
+
 	return 1 + (percentage / 100) * 0.5
 end
 
@@ -79,11 +86,21 @@ local function cleanupAmbientSounds()
 	ambientSounds = {}
 end
 
+local function getAudioParent(character)
+	if USE_CAMERA_AUDIO and workspace.CurrentCamera then
+		return workspace.CurrentCamera
+	end
+
+	return character
+end
+
 local function setupAmbientSounds()
 	local character = player.Character
 	if not character then
 		return
 	end
+
+	local audioParent = getAudioParent(character)
 
 	cleanupAmbientSounds()
 
@@ -97,7 +114,7 @@ local function setupAmbientSounds()
 			sound.RollOffMode = Enum.RollOffMode.Linear
 			sound.RollOffMinDistance = 10
 			sound.RollOffMaxDistance = 60
-			sound.Parent = character
+			sound.Parent = audioParent
 			sound:Play()
 
 			table.insert(ambientSounds, { sound = sound, base = data.volume or 1 })
@@ -126,6 +143,8 @@ local function playRandomEventSound()
 		return
 	end
 
+	local audioParent = getAudioParent(character)
+
 	local percentage = player:GetAttribute("ChancePercent") or 0
 	local tier = getTierForPercentage(percentage)
 	local tierList = EVENT_SOUNDS[tier]
@@ -151,7 +170,7 @@ local function playRandomEventSound()
 	sound.RollOffMode = Enum.RollOffMode.Linear
 	sound.RollOffMinDistance = 10
 	sound.RollOffMaxDistance = 80
-	sound.Parent = character
+	sound.Parent = audioParent
 	sound:Play()
 
 	Debris:AddItem(sound, 5)

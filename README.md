@@ -176,3 +176,7 @@ Configuración clave:
 - `EVENT_SOUNDS` por tier (`low`, `medium`, `high`, `extreme`)
 - `THRESHOLDS` para tiers
 - `calculateBaseVolume`, `calculatePitch`, `calculateTensionMultiplier`
+- `USE_CAMERA_AUDIO` para usar audio interno en `workspace.CurrentCamera`
+
+
+- LOW no aplica `tensionMultiplier` (queda en 1) para mantener ambiente más limpio; la presión empieza en MEDIUM+.
