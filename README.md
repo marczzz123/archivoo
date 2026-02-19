@@ -165,29 +165,29 @@ Si quieres volver al comportamiento fijo (por ejemplo 5%), pon `USE_CHANCE_PERCE
 
 ## AmbientTrapSoundManager
 
-`AmbientTrapSoundManager.client.lua` ahora está separado en **2 capas**:
+`AmbientTrapSoundManager.client.lua` usa una arquitectura profesional por niveles de tensión:
 
-1. **Ambient Loop Layer (simultánea)**
-   - Crea varias capas de sonido (`AMBIENT_SOUNDS`) una sola vez por respawn.
-   - Todas quedan en `Looped = true` y suenan al mismo tiempo (viento + ventilación + etc.).
-   - No se recrean por intervalo; solo se actualiza `Volume` y `Pitch` cuando cambia `ChancePercent`.
+- `AMBIENT_LAYERS.low`
+- `AMBIENT_LAYERS.medium`
+- `AMBIENT_LAYERS.high`
+- `AMBIENT_LAYERS.extreme`
 
-2. **Event Layer (intermitente)**
-   - Reproduce sonidos sueltos de `EVENT_SOUNDS` cada cierto tiempo.
-   - El intervalo es dinámico con `ChancePercent` (`MIN_EVENT_INTERVAL` / `MAX_EVENT_INTERVAL`).
-   - Cada evento se crea y destruye con `Debris`.
+Comportamiento esperado:
+
+- 0–29%: solo capas LOW (ej. viento).
+- 30–59%: LOW + MEDIUM.
+- 60–84%: LOW + MEDIUM + HIGH.
+- 85%+: LOW + MEDIUM + HIGH + EXTREME (ej. latido).
+- 95%+: el tier `extreme` acelera (`PlaybackSpeed`) para subir tensión.
+
+Además mantiene una capa de eventos intermitentes (`EVENT_SOUNDS`) con intervalo dinámico según `ChancePercent`.
 
 Configuración clave:
 
-- `AMBIENT_SOUNDS = { { id, volume }, ... }`
-- `EVENT_SOUNDS` por tier (`low`, `medium`, `high`, `extreme`)
-- `THRESHOLDS` para tiers
-- `calculateBaseVolume`, `calculatePitch`, `calculateTensionMultiplier`
-- `USE_CAMERA_AUDIO` para usar audio interno en `workspace.CurrentCamera`
-
-
-- LOW no aplica `tensionMultiplier` (queda en 1) para mantener ambiente más limpio; la presión empieza en MEDIUM+.
-
+- `AMBIENT_LAYERS = { low, medium, high, extreme }` con `{ id, volume }`.
+- `EVENT_SOUNDS` por tier.
+- `THRESHOLDS` (incluye `heartbeatFast`).
+- `USE_CAMERA_AUDIO` para audio interno en `workspace.CurrentCamera`.
 
 ## ChanceEffects (Lighting)
 

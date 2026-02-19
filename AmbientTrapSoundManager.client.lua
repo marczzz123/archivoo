@@ -3,37 +3,37 @@ local Debris = game:GetService("Debris")
 
 local player = Players.LocalPlayer
 
--- Capas de audio ambiente (loop permanente)
-local AMBIENT_SOUNDS = {
-	{ id = 81877238273397, volume = 0.3 }, -- viento
-	{ id = 131780609989651, volume = 0.25 }, -- ventilación
-	-- Puedes añadir más capas base aquí
+-- Capas de ambiente por nivel de tensión
+local AMBIENT_LAYERS = {
+	low = {
+		{ id = 81877238273397, volume = 0.5 }, -- viento
+	},
+	medium = {
+		{ id = 131780609989651, volume = 0.4 }, -- ventilación
+	},
+	high = {
+		{ id = 113662653409849, volume = 0.5 }, -- tensión grave
+	},
+	extreme = {
+		{ id = 0, volume = 0.6 }, -- latido corazón (reemplaza por tu ID)
+	},
 }
 
 -- Sonidos de eventos intermitentes (jump-scare / tensión)
 local EVENT_SOUNDS = {
-	low = {
-		918273645, -- metal drop 1
-		827364554, -- eco metal
-	},
-	medium = {
-		123456789,
-	},
-	high = {
-		987654321,
-	},
-	extreme = {
-		0,
-	},
+	low = { 918273645, 827364554 },
+	medium = { 123456789 },
+	high = { 987654321 },
+	extreme = { 0 },
 }
 
 local THRESHOLDS = {
 	medium = 30,
 	high = 60,
 	extreme = 85,
+	heartbeatFast = 95,
 }
 
--- Intervalos para eventos (a mayor porcentaje, más frecuentes)
 local MIN_EVENT_INTERVAL = 3
 local MAX_EVENT_INTERVAL = 8
 
@@ -44,7 +44,7 @@ local ambientSounds = {}
 local eventLoop = nil
 
 local function calculateBaseVolume(percentage)
-	return 0.25 + (percentage / 100) * 0.35
+	return 0.22 + (percentage / 100) * 0.28
 end
 
 local function calculatePitch(percentage)
@@ -72,18 +72,20 @@ local function getTierForPercentage(percentage)
 	end
 end
 
-local function calculateEventInterval(percentage)
-	return MAX_EVENT_INTERVAL - (percentage / 100) * (MAX_EVENT_INTERVAL - MIN_EVENT_INTERVAL)
+local function getActiveLayerKeys(percentage)
+	if percentage >= THRESHOLDS.extreme then
+		return { "low", "medium", "high", "extreme" }
+	elseif percentage >= THRESHOLDS.high then
+		return { "low", "medium", "high" }
+	elseif percentage >= THRESHOLDS.medium then
+		return { "low", "medium" }
+	else
+		return { "low" }
+	end
 end
 
-local function cleanupAmbientSounds()
-	for _, sound in ipairs(ambientSounds) do
-		if sound and sound.Parent then
-			sound:Stop()
-			sound:Destroy()
-		end
-	end
-	ambientSounds = {}
+local function calculateEventInterval(percentage)
+	return MAX_EVENT_INTERVAL - (percentage / 100) * (MAX_EVENT_INTERVAL - MIN_EVENT_INTERVAL)
 end
 
 local function getAudioParent(character)
@@ -94,6 +96,19 @@ local function getAudioParent(character)
 	return character
 end
 
+local function cleanupAmbientSounds()
+	for _, layer in pairs(ambientSounds) do
+		for _, entry in ipairs(layer) do
+			local sound = entry.sound
+			if sound and sound.Parent then
+				sound:Stop()
+				sound:Destroy()
+			end
+		end
+	end
+	ambientSounds = {}
+end
+
 local function setupAmbientSounds()
 	local character = player.Character
 	if not character then
@@ -101,25 +116,39 @@ local function setupAmbientSounds()
 	end
 
 	local audioParent = getAudioParent(character)
-
 	cleanupAmbientSounds()
 
-	for i, data in ipairs(AMBIENT_SOUNDS) do
-		if data.id ~= 0 then
-			local sound = Instance.new("Sound")
-			sound.Name = "AmbientLayer_" .. i
-			sound.SoundId = "rbxassetid://" .. data.id
-			sound.Looped = true
-			sound.Volume = 0
-			sound.RollOffMode = Enum.RollOffMode.Linear
-			sound.RollOffMinDistance = 10
-			sound.RollOffMaxDistance = 60
-			sound.Parent = audioParent
-			sound:Play()
+	for tier, list in pairs(AMBIENT_LAYERS) do
+		ambientSounds[tier] = {}
+		for i, data in ipairs(list) do
+			if data.id ~= 0 then
+				local sound = Instance.new("Sound")
+				sound.Name = string.format("AmbientLayer_%s_%d", tier, i)
+				sound.SoundId = "rbxassetid://" .. data.id
+				sound.Looped = true
+				sound.Volume = 0
+				sound.RollOffMode = Enum.RollOffMode.Linear
+				sound.RollOffMinDistance = 10
+				sound.RollOffMaxDistance = 60
+				sound.Parent = audioParent
+				sound:Play()
 
-			table.insert(ambientSounds, { sound = sound, base = data.volume or 1 })
+				table.insert(ambientSounds[tier], {
+					sound = sound,
+					base = data.volume or 1,
+				})
+			end
 		end
 	end
+end
+
+local function isTierActive(activeTierKeys, tier)
+	for _, key in ipairs(activeTierKeys) do
+		if key == tier then
+			return true
+		end
+	end
+	return false
 end
 
 local function updateAmbientVolumes()
@@ -127,12 +156,29 @@ local function updateAmbientVolumes()
 	local baseVolume = calculateBaseVolume(percentage)
 	local tensionMultiplier = calculateTensionMultiplier(percentage)
 	local pitch = calculatePitch(percentage)
+	local activeKeys = getActiveLayerKeys(percentage)
 
-	for _, layer in ipairs(ambientSounds) do
-		local sound = layer.sound
-		if sound and sound.Parent then
-			sound.Volume = math.clamp(baseVolume * layer.base * tensionMultiplier, 0, 1)
-			sound.Pitch = pitch
+	for tier, entries in pairs(ambientSounds) do
+		local active = isTierActive(activeKeys, tier)
+		for _, entry in ipairs(entries) do
+			local sound = entry.sound
+			if sound and sound.Parent then
+				if active then
+					sound.Volume = math.clamp(baseVolume * entry.base * tensionMultiplier, 0, 1)
+					sound.Pitch = pitch
+
+					-- Comportamiento especial: latido más rápido en 95%+
+					if tier == "extreme" and percentage >= THRESHOLDS.heartbeatFast then
+						sound.PlaybackSpeed = 1.25
+					elseif tier == "extreme" then
+						sound.PlaybackSpeed = 1
+					else
+						sound.PlaybackSpeed = 1
+					end
+				else
+					sound.Volume = 0
+				end
+			end
 		end
 	end
 end
@@ -144,7 +190,6 @@ local function playRandomEventSound()
 	end
 
 	local audioParent = getAudioParent(character)
-
 	local percentage = player:GetAttribute("ChancePercent") or 0
 	local tier = getTierForPercentage(percentage)
 	local tierList = EVENT_SOUNDS[tier]
