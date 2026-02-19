@@ -1,6 +1,6 @@
 # Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-Ahora tienes 6 scripts conectados:
+Ahora tienes 7 scripts conectados:
 
 1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
 2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
@@ -8,6 +8,7 @@ Ahora tienes 6 scripts conectados:
 4. `FirstPersonEnforcer.client.lua` (fuerza cámara en primera persona).
 5. `RockTrap.server.lua` (trampa de roca con daño + ragdoll compatible con `%`).
 6. `AmbientTrapSoundManager.client.lua` (sonido ambiente por riesgo).
+7. `ChanceEffects.client.lua` (efectos visuales dinámicos por riesgo).
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -46,6 +47,12 @@ Ahora tienes 6 scripts conectados:
 - **Ubicación:** `StarterPlayer > StarterPlayerScripts`
 - **Tipo:** `LocalScript`
 - **Nombre sugerido:** `AmbientTrapSoundManager`
+
+### 7) Efectos visuales por probabilidad
+- **Archivo:** `ChanceEffects.client.lua`
+- **Ubicación:** `StarterPlayer > StarterPlayerScripts`
+- **Tipo:** `LocalScript`
+- **Nombre sugerido:** `ChanceEffects`
 
 ## Estructura del modelo de puerta
 
@@ -180,3 +187,23 @@ Configuración clave:
 
 
 - LOW no aplica `tensionMultiplier` (queda en 1) para mantener ambiente más limpio; la presión empieza en MEDIUM+.
+
+
+## ChanceEffects (Lighting)
+
+Antes de usar `ChanceEffects.client.lua`, en `Lighting` agrega:
+
+- `BlurEffect` con `Size = 0`
+- `ColorCorrectionEffect` con:
+  - `Brightness = 0`
+  - `Contrast = 0`
+  - `Saturation = 0`
+
+El script lee `ChancePercent` del jugador y aplica tween dinámico:
+
+- Blur
+- Oscurecimiento suave (`Brightness` negativo)
+- Más contraste
+- Menos saturación
+
+Además, al superar 70% aplica un leve tinte rojo (`TintColor`) para sensación de peligro.
