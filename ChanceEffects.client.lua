@@ -18,6 +18,10 @@ local RED_TINT_THRESHOLD = 70
 local RED_TINT = Color3.fromRGB(120, 0, 0)
 local NORMAL_TINT = Color3.new(1, 1, 1)
 
+local blurTween
+local colorTween
+local tintTween
+
 -- ESTA FUNCIÓN SE LLAMA CADA VEZ QUE CAMBIA LA PROBABILIDAD
 local function actualizarEfectos(probabilidad)
 	local intensidad = math.clamp(probabilidad / 100, 0, 1)
@@ -27,21 +31,39 @@ local function actualizarEfectos(probabilidad)
 	local contrast = intensidad * MAX_CONTRAST
 	local saturation = -intensidad * MAX_DESATURATION
 
-	TweenService:Create(blur, TweenInfo.new(TWEEN_TIME), {
-		Size = blurSize,
-	}):Play()
+	if blurTween then
+		blurTween:Cancel()
+	end
 
-	TweenService:Create(color, TweenInfo.new(TWEEN_TIME), {
+	if colorTween then
+		colorTween:Cancel()
+	end
+
+	if tintTween then
+		tintTween:Cancel()
+	end
+
+	blurTween = TweenService:Create(blur, TweenInfo.new(TWEEN_TIME), {
+		Size = blurSize,
+	})
+	blurTween:Play()
+
+	colorTween = TweenService:Create(color, TweenInfo.new(TWEEN_TIME), {
 		Brightness = brightness,
 		Contrast = contrast,
 		Saturation = saturation,
-	}):Play()
+	})
+	colorTween:Play()
 
+	local tintObjetivo = NORMAL_TINT
 	if probabilidad > RED_TINT_THRESHOLD then
-		color.TintColor = RED_TINT
-	else
-		color.TintColor = NORMAL_TINT
+		tintObjetivo = RED_TINT
 	end
+
+	tintTween = TweenService:Create(color, TweenInfo.new(TWEEN_TIME), {
+		TintColor = tintObjetivo,
+	})
+	tintTween:Play()
 end
 
 -- Inicializa desde ChancePercent actual

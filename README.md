@@ -207,3 +207,6 @@ El script lee `ChancePercent` del jugador y aplica tween dinámico:
 - Menos saturación
 
 Además, al superar 70% aplica un leve tinte rojo (`TintColor`) para sensación de peligro.
+
+
+- `ChanceEffects` ahora anima `TintColor` con tween y cancela tweens anteriores (`blurTween`, `colorTween`, `tintTween`) para evitar acumulación al actualizar la probabilidad.
