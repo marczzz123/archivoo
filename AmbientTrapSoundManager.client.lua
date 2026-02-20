@@ -15,19 +15,20 @@ local AMBIENT_LAYERS = {
 	high = {
 		{ id = 113662653409849, volume = 0.5 }, -- tensión grave
 	},
+
 	extreme = {
 		{ id = 134914789373072, volume = 1, name = "Heartbeat" },
-		{ id = 223344556677889, volume = 0.6, name = "Breathing" },
-		{ id = 998877665544332, volume = 0.4, name = "Pressure" },
+		{ id = 112304764602363, volume = 0.6, name = "Breathing" },
+		{ id = 117797174283617, volume = 0.8, name = "Pressure" },
 	},
 }
 
 -- Sonidos de eventos intermitentes (jump-scare / tensión)
 local EVENT_SOUNDS = {
-	low = { 918273645, 827364554 },
-	medium = { 123456789 },
-	high = { 987654321 },
-	extreme = { 0 },
+	low = { 101445086121072, 96197402719407 },
+	medium = { 101445086121072 },
+	high = { 101445086121072 },
+	extreme = { 101445086121072 },
 }
 
 local THRESHOLDS = {
