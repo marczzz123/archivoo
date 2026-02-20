@@ -180,11 +180,18 @@ local function updateAmbientVolumes()
 						local normalized = math.clamp((percentage - THRESHOLDS.extreme) / (100 - THRESHOLDS.extreme), 0, 1)
 
 						if sound.Name == "Heartbeat" then
-							sound.PlaybackSpeed = 1 + normalized * 0.4
-							targetVolume = targetVolume * normalized
+							-- Siempre audible en extreme
+							sound.PlaybackSpeed = 1 + normalized * 0.6
+
+							-- Volumen base fuerte
+							local minVolume = 0.4
+							targetVolume = math.clamp(minVolume + normalized * 0.6, 0, 1)
 						elseif sound.Name == "Breathing" then
 							sound.PlaybackSpeed = 1
-							targetVolume = targetVolume * (normalized ^ 1.5)
+
+							-- Respiración más presente
+							local minVolume = 0.25
+							targetVolume = math.clamp(minVolume + normalized * 0.5, 0, 1)
 						elseif sound.Name == "Pressure" then
 							sound.PlaybackSpeed = 1
 						else
