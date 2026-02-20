@@ -17,7 +17,7 @@ local AMBIENT_LAYERS = {
 	},
 
 	extreme = {
-		{ id = 134914789373072, volume = 1, name = "Heartbeat" },
+		{ id = 110099201702503, volume = 1, name = "Heartbeat" },
 		{ id = 112304764602363, volume = 0.6, name = "Breathing" },
 		{ id = 117797174283617, volume = 0.8, name = "Pressure" },
 	},
@@ -172,6 +172,7 @@ local function updateAmbientVolumes()
 			local sound = entry.sound
 			if sound and sound.Parent then
 				local targetVolume = 0
+				local targetPitch = pitch
 
 				if active then
 					targetVolume = math.clamp(baseVolume * entry.base * tensionMultiplier, 0, 1)
@@ -180,12 +181,17 @@ local function updateAmbientVolumes()
 						local normalized = math.clamp((percentage - THRESHOLDS.extreme) / (100 - THRESHOLDS.extreme), 0, 1)
 
 						if sound.Name == "Heartbeat" then
-							-- Siempre audible en extreme
-							sound.PlaybackSpeed = 1 + normalized * 0.6
+							-- El audio ya late rápido por diseño: mantenemos velocidad fija
+							sound.PlaybackSpeed = 1
 
 							-- Volumen base fuerte
 							local minVolume = 0.4
 							targetVolume = math.clamp(minVolume + normalized * 0.6, 0, 1)
+
+							-- Profundidad progresiva (más grave con tensión)
+							local minPitch = 1
+							local maxDepth = 0.35
+							targetPitch = minPitch - (normalized * maxDepth)
 						elseif sound.Name == "Breathing" then
 							sound.PlaybackSpeed = 1
 
@@ -205,7 +211,7 @@ local function updateAmbientVolumes()
 					end
 				end
 
-				sound.Pitch = pitch
+				sound.Pitch = targetPitch
 
 				if volumeTweens[sound] then
 					volumeTweens[sound]:Cancel()

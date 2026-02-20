@@ -191,7 +191,7 @@ Configuración clave:
 - `USE_CAMERA_AUDIO` para audio interno en `workspace.CurrentCamera`.
 - `VOLUME_TWEEN_TIME` para crossfade suave entre capas al cambiar de porcentaje.
 - En `extreme`, puedes diferenciar por `name` (ej. `Heartbeat`, `Breathing`, `Pressure`) para curvas de volumen/velocidad distintas.
-- `Heartbeat` ahora siempre es audible en `extreme` y escala más fuerte hacia 100%; `Breathing` también entra con base mínima más presente.
+- `Heartbeat` ahora siempre es audible en `extreme`, mantiene velocidad fija y usa pitch progresivamente más grave hacia 100%; `Breathing` también entra con base mínima más presente.
 
 ## ChanceEffects (Lighting)
 
