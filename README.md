@@ -243,5 +243,5 @@ En 85%+ activa una respiración de FOV (pulso suave) para tensión psicológica.
 - La explosión toma posición desde `car:GetPivot().Position` para evitar errores por `PrimaryPart` nulo.
 - Además de la explosión principal del carro, se disparan explosiones secundarias dentro del modelo `Gas Station 1` para que explote toda la estación.
 - Genera escombros temporales con `Debris` para efecto visual de impacto.
-- El NPC habla al spawnear usando `Chat:Chat` sobre `Head`/`BasePart` válido para que la burbuja salga de forma consistente para todos.
+- El NPC muestra diálogo al spawnear con un `BillboardGui` sobre su `Head`/`BasePart`, visible para todos y autodestruido tras 4 segundos.
 - Incluye `debounce` y ventana de regeneración (`REGENERATION_TIME`) para no solapar activaciones

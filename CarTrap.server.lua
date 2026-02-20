@@ -184,28 +184,37 @@ end
 
 local function makeNpcSpeak(npc)
 	if not npc then
-		warn("[TRAMP CAR][NPC] makeNpcSpeak recibió npc nil")
 		return
 	end
 
 	local head = npc:FindFirstChild("Head") or npc:FindFirstChildWhichIsA("BasePart")
 	if not head then
-		warn("[TRAMP CAR][NPC] No se encontró Head/BasePart para diálogo en: " .. npc:GetFullName())
 		return
 	end
 
-	print("[TRAMP CAR][NPC] Intentando diálogo en parte:", head:GetFullName())
-	local ok, err = pcall(function()
-		Chat:Chat(head, NPC_DIALOGUE, Enum.ChatColor.White)
-	end)
+	-- Crear Billboard
+	local billboard = Instance.new("BillboardGui")
+	billboard.Size = UDim2.new(0, 250, 0, 60)
+	billboard.StudsOffset = Vector3.new(0, 3, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Adornee = head
+	billboard.Parent = head
 
-	if ok then
-		print("[TRAMP CAR][NPC] Diálogo enviado:", NPC_DIALOGUE)
-	else
-		warn("[TRAMP CAR][NPC] Falló Chat:Chat:", err)
-	end
+	-- Crear texto
+	local textLabel = Instance.new("TextLabel")
+	textLabel.Size = UDim2.new(1, 0, 1, 0)
+	textLabel.BackgroundTransparency = 1
+	textLabel.TextScaled = true
+	textLabel.TextWrapped = true
+	textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	textLabel.TextStrokeTransparency = 0
+	textLabel.Font = Enum.Font.GothamBold
+	textLabel.Text = NPC_DIALOGUE
+	textLabel.Parent = billboard
+
+	-- Auto destruir después de 4 segundos
+	Debris:AddItem(billboard, 4)
 end
-
 local function activateTrap()
 	if isRegenerating then
 		return
@@ -233,14 +242,11 @@ local function activateTrap()
 
 	local npc = npcModel:Clone()
 	npc.Parent = workspace
-	print("[TRAMP CAR][NPC] NPC clonado y parent asignado:", npc:GetFullName())
 
 	local npcPrimary = ensurePrimaryPart(npc)
 	if not npcPrimary then
-		warn("[TRAMP CAR][NPC] NPC sin PrimaryPart ni BasePart:", npc:GetFullName())
 	else
 		npc:SetPrimaryPartCFrame(npcSpawn.CFrame)
-		print("[TRAMP CAR][NPC] NPC posicionado en npc spawn")
 		makeNpcSpeak(npc)
 	end
 
