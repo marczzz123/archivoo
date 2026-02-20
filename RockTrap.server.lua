@@ -6,11 +6,8 @@ local RAGDOLL_DURATION = 1 -- cuánto dura el ragdoll
 local DAMAGE_AMOUNT = 10 -- daño al activarse
 local COOLDOWN_TIME = 2 -- cooldown por jugador
 
--- Compatibilidad con ChancePercent
-local USE_CHANCE_PERCENT = true -- si false, usa TRAP_SUCCESS_CHANCE fija
-local TRAP_SUCCESS_CHANCE = 5 -- fallback fijo si USE_CHANCE_PERCENT = false
-local MIN_REQUIRED_CHANCE = 1 -- chance mínima para permitir activación
-local MAX_REQUIRED_CHANCE = 100 -- chance máxima para permitir activación
+-- Activación por umbral fijo de ChancePercent
+local REQUIRED_CHANCE_PERCENT = 5 -- >= 5 activa siempre
 
 -- Track cooldowns
 local cooldowns = {}
@@ -69,20 +66,14 @@ local function onRockTouched(otherPart)
 		return
 	end
 
-	-- Obtener chance compatible con sistema global
-	local chance = USE_CHANCE_PERCENT and getPlayerChance(player) or TRAP_SUCCESS_CHANCE
+	-- Si no existe atributo todavía, no activar para evitar comportamientos inconsistentes
+	local chance = getPlayerChance(player)
 	if not chance then
-		-- Si no existe atributo todavía, no activar para evitar comportamientos inconsistentes
 		return
 	end
 
-	if chance < MIN_REQUIRED_CHANCE or chance > MAX_REQUIRED_CHANCE then
-		return
-	end
-
-	-- Check if trap activates (chance%)
-	local randomChance = math.random(1, 100)
-	if randomChance > chance then
+	-- Umbral fijo: activa siempre con >= 5, no activa con < 5
+	if chance < REQUIRED_CHANCE_PERCENT then
 		return
 	end
 

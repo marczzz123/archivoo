@@ -151,16 +151,15 @@ Si luego quieres un ragdoll más avanzado (con constraints), ahí sí conviene m
 Si alguna vez ves que el jugador queda vivo con poca vida en modo trampa, `DoorTrap` ahora usa `forceKillHumanoid()` después del ragdoll para forzar estado `Dead` con fallback adicional.
 
 
-## RockTrap compatible con ChancePercent
+## RockTrap con umbral fijo de ChancePercent
 
-`RockTrap.server.lua` quedó adaptado para usar el sistema global de probabilidad:
+`RockTrap.server.lua` ahora usa activación por umbral fijo, sin tirada aleatoria:
 
-- Lee `player:GetAttribute("ChancePercent")` si `USE_CHANCE_PERCENT = true`.
-- Usa ese valor (1-100) como probabilidad real de activación de la roca.
+- Lee `player:GetAttribute("ChancePercent")`.
+- Si `ChancePercent >= 5`, la roca activa siempre.
+- Si `ChancePercent < 5`, la roca no activa.
 - Mantiene cooldown por jugador para evitar spam.
 - Aplica daño + ragdoll simple cuando activa.
-
-Si quieres volver al comportamiento fijo (por ejemplo 5%), pon `USE_CHANCE_PERCENT = false` y ajusta `TRAP_SUCCESS_CHANCE`.
 
 
 ## AmbientTrapSoundManager
