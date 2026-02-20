@@ -211,5 +211,10 @@ El script lee `ChancePercent` del jugador y aplica tween dinámico:
 
 Además, al superar 70% aplica un leve tinte rojo (`TintColor`) para sensación de peligro.
 
+En 85%+ activa una respiración de FOV (pulso suave) para tensión psicológica.
+
 
 - `ChanceEffects` ahora anima `TintColor` con tween y cancela tweens anteriores (`blurTween`, `colorTween`, `tintTween`) para evitar acumulación al actualizar la probabilidad.
+
+
+- `ChanceEffects` incluye pulso de cámara en extreme (`EXTREME_FOV_THRESHOLD`) con `RenderStepped` y se detiene automáticamente al bajar del umbral.
