@@ -1,6 +1,6 @@
 # Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-Ahora tienes 8 scripts conectados:
+Ahora tienes 9 scripts conectados:
 
 1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
 2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
@@ -10,6 +10,7 @@ Ahora tienes 8 scripts conectados:
 6. `AmbientTrapSoundManager.client.lua` (sonido ambiente por riesgo).
 7. `ChanceEffects.client.lua` (efectos visuales dinámicos por riesgo).
 8. `CarTrap.server.lua` (trampa del carro por umbral fijo de `%`).
+9. `RampCarTrap.server.lua` (trampa de carro por rampa con umbral fijo de `%`).
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -60,6 +61,12 @@ Ahora tienes 8 scripts conectados:
 - **Ubicación:** dentro del model de la trampa del carro en `Workspace`
 - **Tipo:** `Script`
 - **Nombre sugerido:** `CarTrap`
+
+### 9) Trampa de carro por rampa
+- **Archivo:** `RampCarTrap.server.lua`
+- **Ubicación:** dentro del model que contiene `TK's Vision GT` y `Trigger`
+- **Tipo:** `Script`
+- **Nombre sugerido:** `RampCarTrap`
 
 ## Estructura del modelo de puerta
 
@@ -245,3 +252,19 @@ En 85%+ activa una respiración de FOV (pulso suave) para tensión psicológica.
 - Genera escombros temporales con `Debris` para efecto visual de impacto.
 - El NPC muestra diálogo al spawnear con un `BillboardGui` sobre su `Head`/`BasePart`, visible para todos y autodestruido tras 4 segundos.
 - Incluye `debounce` y ventana de regeneración (`REGENERATION_TIME`) para no solapar activaciones
+
+
+## RampCarTrap (modelo con TK's Vision GT + Trigger)
+
+`RampCarTrap.server.lua` usa esta estructura:
+
+- `local model = script.Parent`
+- `local car = model:WaitForChild("TK's Vision GT")`
+- `local trigger = model:WaitForChild("Trigger")`
+
+Comportamiento:
+
+- Si `ChancePercent >= 10`, activa la trampa.
+- Si `ChancePercent < 10`, no pasa nada.
+- Al activar: desancla el carro, aplica empuje inicial hacia adelante y la física hace que caiga por la rampa para aplastar jugadores.
+- Tiene `debounce` con cooldown para evitar activaciones seguidas.
