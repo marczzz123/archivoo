@@ -266,5 +266,6 @@ Comportamiento:
 
 - Si `ChancePercent >= 10`, activa la trampa.
 - Si `ChancePercent < 10`, no pasa nada.
-- Al activar: desancla el carro, aplica empuje inicial hacia adelante y la física hace que caiga por la rampa para aplastar jugadores.
+- Al activar: desancla el carro, congela su `Humanoid` (`PlatformStand = true`), aplica velocidad inicial y además un `ApplyImpulse(...)` fuerte para una caída más violenta/cinemática por la rampa.
 - Tiene `debounce` con cooldown para evitar activaciones seguidas.
+- Para tunear intensidad: `LAUNCH_SPEED` + `IMPULSE_MULTIPLIER`.

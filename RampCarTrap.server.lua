@@ -6,7 +6,9 @@ local trigger = model:WaitForChild("Trigger")
 
 local REQUIRED_CHANCE_PERCENT = 10 -- >=10 activa, <10 no hace nada
 local TRIGGER_COOLDOWN = 8
-local LAUNCH_SPEED = 35 -- empuje inicial para que avance hacia la rampa
+local LAUNCH_SPEED = 35 -- empuje inicial base
+local USE_PHYSICS_IMPULSE = true
+local IMPULSE_MULTIPLIER = 80000
 
 local debounce = false
 
@@ -43,6 +45,14 @@ local function getCarRoot()
 	return nil
 end
 
+local function getCarHumanoid()
+	if car:IsA("Model") then
+		return car:FindFirstChildOfClass("Humanoid")
+	end
+
+	return nil
+end
+
 local function setCarAnchored(anchored)
 	if car:IsA("Model") then
 		for _, d in ipairs(car:GetDescendants()) do
@@ -62,8 +72,17 @@ local function launchCar()
 		return
 	end
 
+	local humanoid = getCarHumanoid()
+	if humanoid then
+		humanoid.PlatformStand = true
+	end
+
 	setCarAnchored(false)
 	root.AssemblyLinearVelocity = root.CFrame.LookVector * LAUNCH_SPEED
+
+	if USE_PHYSICS_IMPULSE then
+		root:ApplyImpulse(root.CFrame.LookVector * IMPULSE_MULTIPLIER * root.AssemblyMass)
+	end
 end
 
 trigger.Touched:Connect(function(hit)
