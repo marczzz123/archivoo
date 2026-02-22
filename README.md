@@ -1,6 +1,6 @@
 # Sistema de probabilidad + trampas + puerta con umbral (15%)
 
-Ahora tienes 9 scripts conectados:
+Ahora tienes 10 scripts conectados:
 
 1. `PlayerChanceSystem.server.lua` (sistema central de probabilidad).
 2. `DoorTrap.server.lua` (puerta que actúa normal o trampa según `%`).
@@ -11,6 +11,7 @@ Ahora tienes 9 scripts conectados:
 7. `ChanceEffects.client.lua` (efectos visuales dinámicos por riesgo).
 8. `CarTrap.server.lua` (trampa del carro por umbral fijo de `%`).
 9. `RampCarTrap.server.lua` (trampa de carro por rampa con umbral fijo de `%`).
+10. `FridgeDropTrap.server.lua` (trampa de refrigerador por caída con umbral fijo de `%`).
 
 ## Dónde va cada archivo (Roblox Studio)
 
@@ -67,6 +68,12 @@ Ahora tienes 9 scripts conectados:
 - **Ubicación:** dentro del model que contiene `Trigger` y `CarSpawn`
 - **Tipo:** `Script`
 - **Nombre sugerido:** `RampCarTrap`
+
+### 10) Trampa de refrigerador
+- **Archivo:** `FridgeDropTrap.server.lua`
+- **Ubicación:** dentro del model que contiene `Trigger` y `Spawn`
+- **Tipo:** `Script`
+- **Nombre sugerido:** `FridgeDropTrap`
 
 ## Estructura del modelo de puerta
 
@@ -270,3 +277,14 @@ Comportamiento:
 - El carro (`Police Car`) se clona en `CarSpawn`, acelera con módulo `Chassis`, y el daño se conecta en todas las `BasePart` dentro de `Body` (si `Body` es `Model`) cuando supera velocidad mínima.
 - Respawn automático: reaparece antes de que termine el cooldown para que la trampa ya esté lista al reiniciarse.
 - Tiene `debounce` con cooldown para evitar activaciones seguidas.
+
+
+## FridgeDropTrap (caída de Refri)
+
+- Trigger: `Trigger`
+- Spawn: `Spawn`
+- Template: `ReplicatedStorage > Refri`
+- Umbral: `ChancePercent >= 3`
+- El `Refri` solo aparece cuando se activa la trampa.
+- Se conecta daño en **todas** las `BasePart` del modelo (no solo una).
+- Se destruye solo y en la siguiente activación vuelve a spawnear en `Spawn` (con pequeño offset aleatorio para que sea menos predecible).
