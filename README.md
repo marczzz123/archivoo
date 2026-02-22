@@ -64,7 +64,7 @@ Ahora tienes 9 scripts conectados:
 
 ### 9) Trampa de carro por rampa
 - **Archivo:** `RampCarTrap.server.lua`
-- **Ubicación:** dentro del model que contiene `TK's Vision GT` y `Trigger`
+- **Ubicación:** dentro del model que contiene `Trigger` y `CarSpawn`
 - **Tipo:** `Script`
 - **Nombre sugerido:** `RampCarTrap`
 
@@ -254,18 +254,19 @@ En 85%+ activa una respiración de FOV (pulso suave) para tensión psicológica.
 - Incluye `debounce` y ventana de regeneración (`REGENERATION_TIME`) para no solapar activaciones
 
 
-## RampCarTrap (modelo con TK's Vision GT + Trigger)
+## RampCarTrap (modelo con Trigger + CarSpawn)
 
 `RampCarTrap.server.lua` usa esta estructura:
 
 - `local model = script.Parent`
-- `local car = model:WaitForChild("TK's Vision GT")`
 - `local trigger = model:WaitForChild("Trigger")`
+- `local carSpawn = model:WaitForChild("CarSpawn")`
+- `local carTemplate = ReplicatedStorage:WaitForChild("Police Car")`
 
 Comportamiento:
 
-- Si `ChancePercent >= 10`, activa la trampa.
-- Si `ChancePercent < 10`, no pasa nada.
-- Al activar: desancla el carro, fuerza `CanCollide = true` en sus partes y ordena al `Humanoid` del carro moverse al `Trigger` con `humanoid:MoveTo(trigger.Position)`.
+- Si `ChancePercent >= 3`, activa la trampa.
+- Si `ChancePercent < 3`, no pasa nada.
+- El carro (`Police Car`) se clona en `CarSpawn`, acelera con módulo `Chassis`, hace daño por impacto (`Body.Touched`) cuando supera velocidad mínima y se elimina solo.
+- Respawn automático: reaparece antes de que termine el cooldown para que la trampa ya esté lista al reiniciarse.
 - Tiene `debounce` con cooldown para evitar activaciones seguidas.
-- Requiere que `TK's Vision GT` tenga `Humanoid` para usar `MoveTo`.
