@@ -58,10 +58,12 @@ local function setCarAnchored(anchored)
 		for _, d in ipairs(car:GetDescendants()) do
 			if d:IsA("BasePart") then
 				d.Anchored = anchored
+				d.CanCollide = true
 			end
 		end
 	elseif car:IsA("BasePart") then
 		car.Anchored = anchored
+		car.CanCollide = true
 	end
 end
 
