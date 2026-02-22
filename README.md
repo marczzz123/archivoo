@@ -266,6 +266,6 @@ Comportamiento:
 
 - Si `ChancePercent >= 10`, activa la trampa.
 - Si `ChancePercent < 10`, no pasa nada.
-- Al activar: desancla el carro, congela su `Humanoid` (`PlatformStand = true`), fuerza `CanCollide = true` en sus partes, aplica velocidad inicial y además un `ApplyImpulse(...)` fuerte para una caída más violenta/cinemática por la rampa.
+- Al activar: desancla el carro, fuerza `CanCollide = true` en sus partes y ordena al `Humanoid` del carro moverse al `Trigger` con `humanoid:MoveTo(trigger.Position)`.
 - Tiene `debounce` con cooldown para evitar activaciones seguidas.
-- Para tunear intensidad: `LAUNCH_SPEED` + `IMPULSE_MULTIPLIER`.
+- Requiere que `TK's Vision GT` tenga `Humanoid` para usar `MoveTo`.

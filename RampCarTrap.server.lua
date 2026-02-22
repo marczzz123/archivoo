@@ -6,9 +6,6 @@ local trigger = model:WaitForChild("Trigger")
 
 local REQUIRED_CHANCE_PERCENT = 10 -- >=10 activa, <10 no hace nada
 local TRIGGER_COOLDOWN = 8
-local LAUNCH_SPEED = 35 -- empuje inicial base
-local USE_PHYSICS_IMPULSE = true
-local IMPULSE_MULTIPLIER = 80000
 
 local debounce = false
 
@@ -75,16 +72,13 @@ local function launchCar()
 	end
 
 	local humanoid = getCarHumanoid()
-	if humanoid then
-		humanoid.PlatformStand = true
+	if not humanoid then
+		warn("[RAMP CAR TRAP] El carro no tiene Humanoid")
+		return
 	end
 
 	setCarAnchored(false)
-	root.AssemblyLinearVelocity = root.CFrame.LookVector * LAUNCH_SPEED
-
-	if USE_PHYSICS_IMPULSE then
-		root:ApplyImpulse(root.CFrame.LookVector * IMPULSE_MULTIPLIER * root.AssemblyMass)
-	end
+	humanoid:MoveTo(trigger.Position)
 end
 
 trigger.Touched:Connect(function(hit)
