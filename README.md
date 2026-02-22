@@ -267,6 +267,6 @@ Comportamiento:
 
 - Si `ChancePercent >= 3`, activa la trampa.
 - Si `ChancePercent < 3`, no pasa nada.
-- El carro (`Police Car`) se clona en `CarSpawn`, acelera con módulo `Chassis`, hace daño por impacto (`Body.Touched`) cuando supera velocidad mínima y se elimina solo.
+- El carro (`Police Car`) se clona en `CarSpawn`, acelera con módulo `Chassis`, y el daño se conecta en todas las `BasePart` dentro de `Body` (si `Body` es `Model`) cuando supera velocidad mínima.
 - Respawn automático: reaparece antes de que termine el cooldown para que la trampa ya esté lista al reiniciarse.
 - Tiene `debounce` con cooldown para evitar activaciones seguidas.

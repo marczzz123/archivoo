@@ -49,28 +49,32 @@ local function clearCurrentCar()
 end
 
 local function connectDamageHitbox(carModel)
-	local body = carModel:WaitForChild("Body")
+	local bodyModel = carModel:WaitForChild("Body")
 
-	body.Touched:Connect(function(hit)
-		if not trapActive or not chassisModule then
-			return
-		end
+	for _, part in ipairs(bodyModel:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Touched:Connect(function(hit)
+				if not trapActive or not chassisModule then
+					return
+				end
 
-		local character = hit:FindFirstAncestorOfClass("Model")
-		if not character then
-			return
-		end
+				local character = hit:FindFirstAncestorOfClass("Model")
+				if not character then
+					return
+				end
 
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if not humanoid or humanoid.Health <= 0 then
-			return
-		end
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if not humanoid or humanoid.Health <= 0 then
+					return
+				end
 
-		local speed = chassisModule.GetAverageVelocity()
-		if speed >= MIN_SPEED_TO_DAMAGE then
-			humanoid:TakeDamage(DAMAGE)
+				local speed = chassisModule.GetAverageVelocity()
+				if speed >= MIN_SPEED_TO_DAMAGE then
+					humanoid:TakeDamage(DAMAGE)
+				end
+			end)
 		end
-	end)
+	end
 end
 
 local function spawnCar()
