@@ -71,6 +71,8 @@ local function setModelAnchored(modelToSet, anchored)
 end
 
 local function connectDamage(fridge)
+	local damagedHumanoids = {}
+
 	for _, part in ipairs(fridge:GetDescendants()) do
 		if part:IsA("BasePart") then
 			part.Touched:Connect(function(hit)
@@ -88,6 +90,11 @@ local function connectDamage(fridge)
 					return
 				end
 
+				if damagedHumanoids[humanoid] then
+					return
+				end
+
+				damagedHumanoids[humanoid] = true
 				humanoid:TakeDamage(DAMAGE)
 			end)
 		end

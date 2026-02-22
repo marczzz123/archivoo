@@ -287,4 +287,5 @@ Comportamiento:
 - Umbral: `ChancePercent >= 3`
 - El `Refri` solo aparece cuando se activa la trampa.
 - Se conecta daño en **todas** las `BasePart` del modelo (no solo una).
+- Cada activación evita daño múltiple repetido al mismo `Humanoid`.
 - Se destruye solo y en la siguiente activación vuelve a spawnear en `Spawn` (con pequeño offset aleatorio para que sea menos predecible).
